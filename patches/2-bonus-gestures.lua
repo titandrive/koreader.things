@@ -47,6 +47,8 @@ local GESTURE_GROUPS = {
             "one_finger_swipe_center_to_top",
             "one_finger_swipe_bottom_to_center",
             "one_finger_swipe_center_to_bottom",
+        	"one_finger_swipe_center_to_left",
+	        "one_finger_swipe_center_to_right",
         },
     },
     {
@@ -57,6 +59,8 @@ local GESTURE_GROUPS = {
             "two_finger_swipe_center_to_top",
             "two_finger_swipe_bottom_to_center",
             "two_finger_swipe_center_to_bottom",
+            "two_finger_swipe_center_to_left",
+	        "two_finger_swipe_center_to_right",
         },
     },
 }
@@ -76,6 +80,10 @@ local GESTURE_TITLES = {
     two_finger_swipe_center_to_top = _("Center to top"),
     one_finger_swipe_center_to_bottom = _("Center to bottom"),
     two_finger_swipe_center_to_bottom = _("Center to bottom"),
+    one_finger_swipe_center_to_left = _("Center to left"),
+    two_finger_swipe_center_to_left = _("Center to left"),
+    one_finger_swipe_center_to_right = _("Center to right"),
+    two_finger_swipe_center_to_right = _("Center to right"),
 }
 
 -- Ratios are relative to the current screen orientation.
@@ -107,6 +115,14 @@ local TOP_SHORT_TARGET = {
 local BOTTOM_SHORT_TARGET = {
     ratio_x = 0.20, ratio_y = 0.70,
     ratio_w = 0.60, ratio_h = 0.30,
+}
+local LEFT_SHORT_TARGET = {
+    ratio_x = 0.00, ratio_y = 0.20,
+    ratio_w = 0.30, ratio_h = 0.60,
+}
+local RIGHT_SHORT_TARGET = {
+    ratio_x = 0.70, ratio_y = 0.20,
+    ratio_w = 0.30, ratio_h = 0.60,
 }
 
 local function ends_in_zone(gesture, zone)
@@ -216,6 +232,10 @@ local function install(Gestures)
             common_overrides(self, "swipe", false), "north", TOP_SHORT_TARGET)
         register_zone(self, "one_finger_swipe_center_to_bottom", "swipe", SCREEN_CENTER,
             common_overrides(self, "swipe", true), "south", BOTTOM_SHORT_TARGET)
+        register_zone(self, "one_finger_swipe_center_to_left", "swipe", SCREEN_CENTER,
+            common_overrides(self, "swipe", false), "west", LEFT_SHORT_TARGET)
+    	register_zone(self, "one_finger_swipe_center_to_right", "swipe", SCREEN_CENTER,
+            common_overrides(self, "swipe", false), "east", RIGHT_SHORT_TARGET)
 
         if self.has_multitouch then
             register_zone(self, "two_finger_swipe_top_to_center",
@@ -230,6 +250,12 @@ local function install(Gestures)
             register_zone(self, "two_finger_swipe_center_to_bottom",
                 "two_finger_swipe", SCREEN_CENTER,
                 { "two_finger_swipe_south" }, "south", BOTTOM_SHORT_TARGET)
+        	register_zone(self, "two_finger_swipe_center_to_left",
+                "two_finger_swipe", SCREEN_CENTER,
+                { "two_finger_swipe_south" }, "west", LEFT_SHORT_TARGET)
+	        register_zone(self, "two_finger_swipe_center_to_right",
+                "two_finger_swipe", SCREEN_CENTER,
+                { "two_finger_swipe_south" }, "east", RIGHT_SHORT_TARGET)
         end
     end
 
