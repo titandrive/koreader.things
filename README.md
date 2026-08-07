@@ -40,6 +40,22 @@ operation with KOReader's Dispatcher, so the same actions can be assigned to
 gestures, hardware buttons, profiles, or anything else that uses KOReader's
 action picker.
 
+### [Thematic](https://github.com/titandrive/thematic.koplugin) (`thematic.koplugin`)
+
+**Platforms:** Android verified; other platforms unverified
+
+Thematic adds independent color themes for KOReader's interface and reader
+content, with separate selections for day and night mode. It includes built-in
+light and dark palettes and lets you create, duplicate, edit, and delete custom
+themes entirely inside KOReader.
+
+The plugin also integrates with Zen UI to theme its home screen, navigation
+tabs, menus, dialogs, buttons, status surfaces, tap feedback, and library cover
+borders. Thematic can be disabled at any time to restore KOReader and Zen UI's
+stock rendering without modifying either application's files or saved
+appearance settings. Enable, disable, and toggle actions can be assigned to
+KOReader gestures, profiles, or other action shortcuts.
+
 ### [KOBoard](https://github.com/titandrive/koboard) (`koboard.koplugin`)
 
 **Platforms:** Android only
