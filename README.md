@@ -135,28 +135,6 @@ Install it as:
 2--ui-font_enhanced.lua
 ```
 
-### [Fancy Highlight Styles Patch](patches/2-fancy-highlight-styles.lua)
-
-Adds eight highlight styles alongside KOReader's stock styles:
-
-- Wavy
-- Squiggly
-- Dash
-- Dot
-- Double underline
-- Zig-zag
-- Circle
-- Rectangle
-
-The patch also adds adjustable line thickness for the new styles and the stock
-Underline style. Thickness choices are saved and reused automatically.
-
-Install it as:
-
-```text
-2-fancy-highlight-styles.lua
-```
-
 ### [Move to Archive Patch](patches/2-move-to-archive.lua)
 
 A KOReader user patch that adds archive actions to the book menus and end-of-book popup.
@@ -245,25 +223,4 @@ Install it as:
 
 ```text
 2-action-finder.lua
-```
-
-### [OPDS XML Compatibility Patch](patches/2-opds-xml-compat.lua)
-
-A temporary compatibility patch for KOReader v2026.07 that advertises support
-for both OPDS 2.0 JSON and OPDS 1.x Atom feeds.
-
-It changes the OPDS request's `Accept` value to:
-
-```text
-application/opds+json, application/atom+xml
-```
-
-This fixes OPDS 1.x servers that return an error when KOReader requests only
-OPDS 2.0 JSON. The patch can be removed once the compatibility fix is included
-upstream.
-
-Install it as:
-
-```text
-2-opds-xml-compat.lua
 ```
