@@ -301,6 +301,31 @@ local function install(fm)
     end)
 end
 
+-- KOReader's Move to archive plugin closes ReaderUI and immediately rebuilds
+-- FileManager when "Go to archive folder" is invoked. On Android, ReaderUI's
+-- close is still queued at that point, so the synchronous reinit can wedge the
+-- UI loop. Let teardown finish before opening the requested folder.
+local function install_archive_navigation_fix(plugin)
+    if not plugin or plugin._move_to_archive_navigation_fixed
+            or type(plugin.openFileBrowser) ~= "function" then
+        return
+    end
+
+    plugin.openFileBrowser = function(self, path)
+        if self.ui and self.ui.document then
+            self.ui:onClose()
+        end
+        UIManager:nextTick(function()
+            if FileManager.instance then
+                FileManager.instance:reinit(path)
+            else
+                FileManager:showFiles(path)
+            end
+        end)
+    end
+    plugin._move_to_archive_navigation_fixed = true
+end
+
 -- Zen UI replaces KOReader's stock long-press dialog, so the normal
 -- addFileDialogButtons extension rows never reach it. Its context menu accepts
 -- item-specific rows through _zen_extra_buttons; bridge our existing archive
@@ -356,10 +381,11 @@ local original_loadPlugins = PluginLoader.loadPlugins
 function PluginLoader:loadPlugins(...)
     local enabled_plugins, disabled_plugins = original_loadPlugins(self, ...)
     for _, plugin in ipairs(enabled_plugins) do
-        if plugin.name == "zen_ui" then
+        if plugin.name == "movetoarchive" then
+            install_archive_navigation_fix(plugin)
+        elseif plugin.name == "zen_ui" then
             install_zen_context_button(plugin.ui or FileManager.instance)
             install_zen_end_screen_button()
-            break
         end
     end
     return enabled_plugins, disabled_plugins
