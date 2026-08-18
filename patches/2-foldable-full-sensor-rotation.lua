@@ -15,6 +15,7 @@ if Device:isAndroid() then
     local android = require("android")
     local ffi = require("ffi")
     local C = ffi.C
+    local UIManager = require("ui/uimanager")
     local _ = require("gettext")
 
     local model = tostring(android.prop.model or "")
@@ -28,6 +29,7 @@ if Device:isAndroid() then
         Device.screen._foldable_full_sensor_rotation = true
         local auto_rotation_setting = "foldable_full_sensor_rotation"
         local original_setRotationMode = Device.screen.setRotationMode
+        local original_broadcastEvent = UIManager.broadcastEvent
 
         if G_reader_settings:readSetting(auto_rotation_setting) == nil then
             G_reader_settings:saveSetting(auto_rotation_setting, true)
@@ -35,13 +37,22 @@ if Device:isAndroid() then
 
         function Device.screen:setRotationMode(mode)
             if G_reader_settings:isTrue(auto_rotation_setting) then
-                if mode == self:getRotationMode() then
-                    android.orientation.set(C.ASCREEN_ORIENTATION_FULL_SENSOR)
-                    return
-                end
-                G_reader_settings:saveSetting(auto_rotation_setting, false)
+                android.orientation.set(C.ASCREEN_ORIENTATION_FULL_SENSOR)
+                return
             end
             original_setRotationMode(self, mode)
+        end
+
+        -- Startup restores call onSetRotationMode directly, while explicit
+        -- rotation controls (including Zen UI quick settings) broadcast this
+        -- event. This lets manual choices disable auto mode without a fragile
+        -- startup timer.
+        UIManager.broadcastEvent = function(self, event, ...)
+            if event and event.handler == "onSetRotationMode"
+                    and G_reader_settings:isTrue(auto_rotation_setting) then
+                G_reader_settings:saveSetting(auto_rotation_setting, false)
+            end
+            return original_broadcastEvent(self, event, ...)
         end
 
         local rotation_menu = require("ui/elements/screen_rotation_menu_table")
