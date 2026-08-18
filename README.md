@@ -84,6 +84,26 @@ swipe navigation plus automatic or fixed font sizing.
 
 ## Patches
 
+### [Fold 8 Full-Sensor Rotation Patch](patches/2-foldable-full-sensor-rotation.lua)
+
+**Platforms:** Samsung Galaxy Z Fold 8 (`SM-F971U1`)
+
+Allows KOReader to rotate between all four orientations on the Fold 8's inner
+display. Without the patch, KOReader's orientation request is interpreted as
+sensor-landscape on the landscape-native unfolded display, so Android rejects
+portrait rotations even when system Auto rotate is enabled.
+
+The patch adds an **Auto rotate (all orientations)** choice to KOReader's
+rotation menu. Auto mode defers to Android's full orientation sensor, while
+choosing one of KOReader's normal rotation angles disables auto mode and locks
+the display to that selection.
+
+Install it as:
+
+```text
+2-foldable-full-sensor-rotation.lua
+```
+
 ### [Menu Breadcrumbs Patch](patches/2-menu-breadcrumbs.lua)
 
 Adds a breadcrumb row to KOReader's nested top menus so the current menu
