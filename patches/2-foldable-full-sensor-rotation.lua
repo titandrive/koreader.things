@@ -1,7 +1,8 @@
 -- 2-foldable-full-sensor-rotation.lua
 -- Repository: https://github.com/titandrive/koreader.things
 --
--- Lets Android handle all four sensor orientations on the Samsung Fold 8.
+-- Lets Android handle all four user-enabled sensor orientations on the
+-- Samsung Fold 8 while respecting Android's Auto rotate setting.
 -- KOReader normally turns its rotation modes into fixed Android orientation
 -- requests. On the Fold's landscape-native inner display, Samsung treats that
 -- request as SENSOR_LANDSCAPE, which prevents portrait sensor rotations.
@@ -30,6 +31,37 @@ if Device:isAndroid() then
         local auto_rotation_setting = "foldable_full_sensor_rotation"
         local original_setRotationMode = Device.screen.setRotationMode
         local original_broadcastEvent = UIManager.broadcastEvent
+        local android_full_user = 13 -- ActivityInfo.SCREEN_ORIENTATION_FULL_USER
+
+        -- android-luajit-launcher currently validates orientation values only
+        -- through FULL_SENSOR (10), although its Java bridge accepts FULL_USER
+        -- (13). Reuse the bridge captured by android.orientation.set.
+        local orientation_jni
+        for index = 1, 10 do
+            local name, value = debug.getupvalue(android.orientation.set, index)
+            if not name then break end
+            if name == "JNI" then
+                orientation_jni = value
+                break
+            end
+        end
+
+        local function setFullUserOrientation()
+            if orientation_jni then
+                orientation_jni:context(android.app.activity.vm, function(jni)
+                    jni:callVoidMethod(
+                        android.app.activity.clazz,
+                        "setScreenOrientation",
+                        "(I)V",
+                        ffi.new("int32_t", android_full_user)
+                    )
+                end)
+            else
+                -- USER honors the system lock, but may be limited to fewer
+                -- sensor positions on older Android versions.
+                android.orientation.set(C.ASCREEN_ORIENTATION_USER)
+            end
+        end
 
         if G_reader_settings:readSetting(auto_rotation_setting) == nil then
             G_reader_settings:saveSetting(auto_rotation_setting, true)
@@ -37,7 +69,7 @@ if Device:isAndroid() then
 
         function Device.screen:setRotationMode(mode)
             if G_reader_settings:isTrue(auto_rotation_setting) then
-                android.orientation.set(C.ASCREEN_ORIENTATION_FULL_SENSOR)
+                setFullUserOrientation()
                 return
             end
             original_setRotationMode(self, mode)
@@ -82,7 +114,7 @@ if Device:isAndroid() then
                     end,
                     callback = function(touchmenu_instance)
                         G_reader_settings:saveSetting(auto_rotation_setting, true)
-                        android.orientation.set(C.ASCREEN_ORIENTATION_FULL_SENSOR)
+                        setFullUserOrientation()
                         touchmenu_instance:closeMenu()
                     end,
                 })
@@ -92,7 +124,7 @@ if Device:isAndroid() then
         end
 
         if G_reader_settings:isTrue(auto_rotation_setting) then
-            android.orientation.set(C.ASCREEN_ORIENTATION_FULL_SENSOR)
+            setFullUserOrientation()
         end
         android.LOGI("Fold 8: enabled selectable full-sensor rotation user patch")
     end
